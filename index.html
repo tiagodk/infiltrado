@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>Infiltrado</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Camada decorativa de fundo (puramente visual, não referenciada pelo script.js) -->
+<div class="bg-decor" aria-hidden="true">
+  <div class="bg-blob bg-blob-wine"></div>
+  <div class="bg-blob bg-blob-gold"></div>
+  <div class="bg-grain"></div>
+  <div class="bg-watermark">INFILTRADO</div>
+</div>
+
+<div id="app">
+
+  <!-- ============ TOAST ============ -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============ MODAL: COMO JOGAR ============ -->
+  <div class="modal-overlay" id="howToPlayModal">
+    <div class="modal-sheet">
+      <h2 data-i18n="howToPlayTitle"></h2>
+      <p data-i18n="howToPlayBody"></p>
+      <button class="btn btn-primary btn-block" id="howToPlayCloseBtn" data-i18n="howToPlayClose"></button>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: CONFIRMAR SAÍDA ============ -->
+  <div class="modal-overlay" id="confirmExitModal">
+    <div class="modal-sheet">
+      <h2 data-i18n="confirmExit"></h2>
+      <p data-i18n="confirmExitBody"></p>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="confirmExitNoBtn" data-i18n="no"></button>
+        <button class="btn btn-danger" id="confirmExitYesBtn" data-i18n="yes"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TELA: MENU PRINCIPAL ============ -->
+  <section class="screen menu-screen active" id="screen-menu">
+    <div class="menu-hero">
+      <div class="menu-mask" aria-hidden="true">
+        <svg viewBox="0 0 100 100" class="logo-mark" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="maskGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--wine-bright)"/>
+              <stop offset="100%" stop-color="var(--wine)"/>
+            </linearGradient>
+          </defs>
+          <path d="M50 6 C25 6 8 20 8 40 C8 58 20 70 20 70 L20 82 C20 88 26 92 31 89 L40 84 C43 85 46.5 85.5 50 85.5 C53.5 85.5 57 85 60 84 L69 89 C74 92 80 88 80 82 L80 70 C80 70 92 58 92 40 C92 20 75 6 50 6 Z" fill="url(#maskGrad)" stroke="var(--gold)" stroke-width="1.5"/>
+          <circle class="logo-eye logo-eye-left" cx="34" cy="42" r="7" fill="var(--bg-void)"/>
+          <circle class="logo-eye logo-eye-right" cx="66" cy="42" r="7" fill="var(--gold-strong)"/>
+          <circle cx="66" cy="42" r="2.6" fill="var(--bg-void)"/>
+        </svg>
+      </div>
+      <h1 data-i18n="appName"></h1>
+      <p data-i18n="tagline"></p>
+    </div>
+    <div class="menu-actions">
+      <button class="btn btn-primary btn-block" id="menuPlayBtn" data-i18n="menuPlay"></button>
+      <button class="btn btn-secondary btn-block" id="menuSettingsBtn" data-i18n="menuSettings"></button>
+      <div class="menu-footer-links">
+        <button class="link-btn" id="menuHowToPlayBtn" data-i18n="menuHowToPlay"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TELA: CADASTRO DE JOGADORES ============ -->
+  <section class="screen" id="screen-players">
+    <div class="screen-header">
+      <button class="icon-btn" id="playersBackBtn">←</button>
+      <h2 data-i18n="playersTitle"></h2>
+    </div>
+    <p class="subtitle" id="playersSubtitle" data-i18n="playersSubtitle"></p>
+
+    <div class="screen-body">
+      <div>
+        <input type="text" class="text-input" id="playerNameInput" maxlength="20" data-i18n-placeholder="playerNamePlaceholder" />
+        <div class="field-error" id="playerFieldError"></div>
+      </div>
+      <button class="btn btn-secondary btn-block" id="addPlayerBtn" data-i18n="addPlayer"></button>
+
+      <div class="player-list scroll-area" id="playerList"></div>
+    </div>
+
+    <div class="footer-bar">
+      <button class="btn btn-primary btn-block" id="playersContinueBtn" data-i18n="continueBtn" disabled></button>
+    </div>
+  </section>
+
+  <!-- ============ TELA: SELEÇÃO DE TEMA ============ -->
+  <section class="screen" id="screen-themes">
+    <div class="screen-header">
+      <button class="icon-btn" id="themesBackBtn">←</button>
+      <h2 data-i18n="themeTitle"></h2>
+    </div>
+    <p class="subtitle" data-i18n="themeSubtitle"></p>
+
+    <div class="screen-body">
+      <div class="theme-grid scroll-area" id="themeGrid"></div>
+      <button class="btn btn-ghost btn-block" id="themeRandomBtn" data-i18n="themeRandom"></button>
+    </div>
+
+    <div class="footer-bar">
+      <button class="btn btn-primary btn-block" id="startGameBtn" data-i18n="startGame" disabled></button>
+    </div>
+  </section>
+
+  <!-- ============ TELA: CONFIGURAÇÕES ============ -->
+  <section class="screen" id="screen-settings">
+    <div class="screen-header">
+      <button class="icon-btn" id="settingsBackBtn">←</button>
+      <h2 data-i18n="settingsTitle"></h2>
+    </div>
+
+    <div class="screen-body scroll-area">
+      <div class="settings-group">
+        <h3 data-i18n="menuLanguage"></h3>
+        <div class="chip-row" id="languageChips">
+          <button class="chip" data-lang="pt" data-i18n="languagePt"></button>
+          <button class="chip" data-lang="en" data-i18n="languageEn"></button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3 data-i18n="settingsImpostorCount"></h3>
+        <div class="chip-row" id="impostorCountChips">
+          <button class="chip" data-value="auto" data-i18n="settingsImpostorAuto"></button>
+          <button class="chip" data-value="1" data-i18n="settingsImpostor1"></button>
+          <button class="chip" data-value="2" data-i18n="settingsImpostor2"></button>
+          <button class="chip" data-value="3" data-i18n="settingsImpostor3"></button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3 data-i18n="settingsClueTime"></h3>
+        <div class="chip-row" id="clueTimeChips">
+          <button class="chip" data-value="0" data-i18n="settingsTimeNone"></button>
+          <button class="chip" data-value="15" data-i18n="settingsTime15"></button>
+          <button class="chip" data-value="30" data-i18n="settingsTime30"></button>
+          <button class="chip" data-value="60" data-i18n="settingsTime60"></button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="toggle-row">
+          <span data-i18n="settingsImpostorHint"></span>
+          <label class="switch">
+            <input type="checkbox" id="impostorHintToggle" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span data-i18n="settingsLastChance"></span>
+          <label class="switch">
+            <input type="checkbox" id="lastChanceToggle" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span data-i18n="settingsSound"></span>
+          <label class="switch">
+            <input type="checkbox" id="soundToggle" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bar">
+      <button class="btn btn-primary btn-block" id="settingsDoneBtn" data-i18n="settingsBack"></button>
+    </div>
+  </section>
+
+  <!-- ============ TELA: REVELAÇÃO ============ -->
+  <section class="screen reveal-screen" id="screen-reveal">
+    <div class="reveal-card" id="revealCard">
+
+      <!-- Estado: aguardando toque -->
+      <div id="revealIntroState">
+        <div class="reveal-icon">📱</div>
+        <div class="reveal-name" id="revealPlayerName"></div>
+        <p class="reveal-instruction" data-i18n="revealInstruction"></p>
+        <button class="reveal-flip-btn" id="revealFlipBtn" data-i18n="revealTapToSee"></button>
+      </div>
+
+      <!-- Estado: papel revelado (comum) -->
+      <div class="reveal-result" id="revealCommonResult">
+        <div class="reveal-icon">🃏</div>
+        <div class="reveal-word-label" data-i18n="revealCommonTitle"></div>
+        <div class="reveal-word" id="revealWordText"></div>
+        <button class="btn btn-mint btn-block" id="hideAndPassBtnCommon" data-i18n="revealHideAndPass"></button>
+      </div>
+
+      <!-- Estado: papel revelado (impostor) -->
+      <div class="reveal-result" id="revealImpostorResult">
+        <div class="reveal-icon">❓</div>
+        <div class="reveal-impostor-title" data-i18n="revealImpostorTitle"></div>
+        <p class="reveal-instruction" id="revealImpostorNoHintText" data-i18n="revealImpostorNoHint"></p>
+        <div class="reveal-hint-box" id="revealHintBox" style="display:none;">
+          <span data-i18n="revealImpostorHintLabel"></span> <span id="revealHintText"></span>
+        </div>
+        <button class="btn btn-danger btn-block" id="hideAndPassBtnImpostor" data-i18n="revealHideAndPass"></button>
+      </div>
+
+      <!-- Estado: passar o celular -->
+      <div class="reveal-result" id="revealPassState">
+        <div class="pass-phone-icon">🤝</div>
+        <div class="reveal-name" id="revealPassName"></div>
+        <p class="reveal-instruction" data-i18n="revealPassPhoneInstruction"></p>
+        <button class="btn btn-primary btn-block" id="revealPassContinueBtn" data-i18n="continueBtn"></button>
+      </div>
+
+      <!-- Estado: todos revelados -->
+      <div class="reveal-result" id="revealAllDoneState">
+        <div class="reveal-icon">✅</div>
+        <p class="reveal-instruction" data-i18n="revealAllDone"></p>
+        <button class="btn btn-primary btn-block" id="startCluesBtn" data-i18n="revealStartClues"></button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TELA: RODADA DE PISTAS ============ -->
+  <section class="screen" id="screen-clues">
+    <div class="screen-header">
+      <span></span>
+      <h2 data-i18n="cluesTitle"></h2>
+    </div>
+    <p class="subtitle" data-i18n="cluesInstruction"></p>
+
+    <div class="screen-body">
+      <div class="reveal-card" style="align-self:center; width:100%;">
+        <div class="reveal-icon">🗣️</div>
+        <div class="reveal-name" id="cluesCurrentPlayer"></div>
+
+        <div id="cluesTimerBlock">
+          <div class="timer-ring-wrap">
+            <div class="timer-display" id="cluesTimerDisplay">--</div>
+          </div>
+          <button class="btn btn-secondary btn-block" id="cluesStartTimerBtn" data-i18n="cluesStartTimer"></button>
+        </div>
+        <p class="subtitle" id="cluesNoTimerText" data-i18n="cluesNoTimer" style="display:none;"></p>
+
+        <button class="btn btn-mint btn-block" id="cluesNextPlayerBtn" data-i18n="cluesNextPlayer"></button>
+      </div>
+
+      <div class="order-list" id="cluesOrderList"></div>
+    </div>
+
+    <div class="footer-bar">
+      <button class="btn btn-primary btn-block" id="cluesGoToVoteBtn" data-i18n="cluesGoToVote"></button>
+    </div>
+  </section>
+
+  <!-- ============ TELA: VOTAÇÃO ============ -->
+  <section class="screen" id="screen-vote">
+    <div class="screen-header">
+      <span></span>
+      <h2 data-i18n="voteTitle"></h2>
+    </div>
+    <p class="subtitle" data-i18n="voteInstruction"></p>
+
+    <div class="screen-body">
+      <div class="vote-list scroll-area" id="voteList"></div>
+    </div>
+
+    <div class="footer-bar">
+      <button class="btn btn-primary btn-block" id="voteConfirmBtn" data-i18n="voteConfirm" disabled></button>
+    </div>
+  </section>
+
+  <!-- ============ TELA: RESULTADO DA VOTAÇÃO (ERRADA) ============ -->
+  <section class="screen result-screen" id="screen-vote-wrong">
+    <div class="result-card">
+      <div class="result-icon">🙅</div>
+      <div class="result-title lose" id="voteWrongTitle"></div>
+      <p class="result-subtitle" data-i18n="voteWrongSubtitle"></p>
+      <button class="btn btn-primary btn-block" id="voteAgainBtn" data-i18n="voteAgain"></button>
+    </div>
+  </section>
+
+  <!-- ============ TELA: ÚLTIMA CHANCE ============ -->
+  <section class="screen result-screen" id="screen-last-chance">
+    <div class="result-card">
+      <div class="result-icon">😱</div>
+      <div class="result-title lose" data-i18n="lastChanceTitle"></div>
+      <p class="result-subtitle" data-i18n="lastChanceSubtitle"></p>
+      <p class="subtitle" data-i18n="lastChanceInstruction"></p>
+
+      <input type="text" class="text-input" id="lastChanceInput" data-i18n-placeholder="lastChancePlaceholder" />
+
+      <div class="last-chance-options" id="lastChanceOptions"></div>
+
+      <button class="btn btn-danger btn-block" id="lastChanceConfirmBtn" data-i18n="lastChanceConfirm"></button>
+    </div>
+  </section>
+
+  <!-- ============ TELA: RESULTADO FINAL ============ -->
+  <section class="screen result-screen" id="screen-result">
+    <div class="result-card">
+      <div class="confetti-field" aria-hidden="true">
+        <span class="confetti-piece"></span><span class="confetti-piece"></span><span class="confetti-piece"></span>
+        <span class="confetti-piece"></span><span class="confetti-piece"></span><span class="confetti-piece"></span>
+        <span class="confetti-piece"></span><span class="confetti-piece"></span><span class="confetti-piece"></span>
+        <span class="confetti-piece"></span><span class="confetti-piece"></span><span class="confetti-piece"></span>
+      </div>
+      <div class="result-icon" id="resultIcon">🏆</div>
+      <div class="result-title" id="resultTitle"></div>
+      <p class="result-subtitle" id="resultSubtitle"></p>
+      <p class="result-subtitle" id="resultWordLine"></p>
+      <p class="result-subtitle" id="resultImpostorLine"></p>
+
+      <div class="scoreboard" id="scoreboard">
+        <h3 data-i18n="resultScoreboard"></h3>
+        <div id="scoreboardList"></div>
+      </div>
+
+      <div class="menu-actions" style="width:100%; margin-top:10px;">
+        <button class="btn btn-primary btn-block" id="playAgainBtn" data-i18n="resultPlayAgain"></button>
+        <button class="btn btn-secondary btn-block" id="newGameBtn" data-i18n="resultNewGame"></button>
+        <button class="btn btn-ghost btn-block" id="backToMenuBtn" data-i18n="resultBackToMenu"></button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Utilitário compartilhado -->
+<script src="data/_helper.js"></script>
+
+<!-- Bancos de palavras -->
+<script src="data/celebridades.js"></script>
+<script src="data/futebol.js"></script>
+<script src="data/esportes.js"></script>
+<script src="data/escola.js"></script>
+<script src="data/casa.js"></script>
+<script src="data/games.js"></script>
+<script src="data/filmes-series.js"></script>
+<script src="data/comidas.js"></script>
+<script src="data/lugares-paises.js"></script>
+
+<!-- Idiomas -->
+<script src="i18n.js"></script>
+
+<!-- Lógica do jogo -->
+<script src="script.js"></script>
+
+</body>
+</html>
